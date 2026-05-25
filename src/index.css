@@ -1,0 +1,145 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 222 47% 11%;
+    --card: 0 0% 98%;
+    --card-foreground: 222 47% 11%;
+    --primary: 217 91% 50%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 214 32% 91%;
+    --secondary-foreground: 222 47% 11%;
+    --muted: 214 32% 91%;
+    --muted-foreground: 215 16% 47%;
+    --accent: 214 32% 91%;
+    --accent-foreground: 222 47% 11%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 214 32% 83%;
+    --input: 214 32% 83%;
+    --ring: 217 91% 50%;
+    --radius: 0.5rem;
+  }
+
+  .dark {
+    --background: 222 47% 6%;
+    --foreground: 210 40% 98%;
+    --card: 222 47% 9%;
+    --card-foreground: 210 40% 98%;
+    --primary: 217 91% 60%;
+    --primary-foreground: 222 47% 6%;
+    --secondary: 217 33% 17%;
+    --secondary-foreground: 210 40% 98%;
+    --muted: 217 33% 17%;
+    --muted-foreground: 215 20% 65%;
+    --accent: 217 33% 17%;
+    --accent-foreground: 210 40% 98%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 217 33% 17%;
+    --input: 217 33% 17%;
+    --ring: 217 91% 60%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+    margin: 0;
+    min-height: 100vh;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  }
+  #root {
+    min-height: 100vh;
+  }
+}
+
+/* React Flow theme overrides */
+.react-flow__background {
+  background-color: hsl(var(--background)) !important;
+}
+
+.react-flow__minimap {
+  background-color: hsl(var(--card)) !important;
+}
+
+.react-flow__controls button {
+  background-color: hsl(var(--secondary)) !important;
+  color: hsl(var(--foreground)) !important;
+  border-color: hsl(var(--border)) !important;
+}
+
+.react-flow__controls button:hover {
+  background-color: hsl(var(--accent)) !important;
+}
+
+.react-flow__edge-path {
+  stroke: hsl(var(--muted-foreground)) !important;
+}
+
+.react-flow__edge-textbg {
+  fill: hsl(var(--card)) !important;
+}
+
+.react-flow__edge-text {
+  fill: hsl(var(--muted-foreground)) !important;
+}
+
+/* ===== Kingdom Building Animations ===== */
+
+/* Golden glow pulse for pristine buildings */
+@keyframes golden-glow {
+  0%, 100% { opacity: 0.2; }
+  50% { opacity: 0.5; }
+}
+
+.building-glow {
+  animation: golden-glow 3s ease-in-out infinite;
+}
+
+/* Pristine building subtle hover glow */
+.building-pristine {
+  transition: filter 0.3s ease;
+}
+.building-pristine:hover {
+  filter: brightness(1.2) drop-shadow(0 0 8px rgba(251, 191, 36, 0.4)) !important;
+}
+
+/* Damaged building smoke animation */
+@keyframes smoke-rise {
+  0% { transform: translateY(0) scale(1); opacity: 0.3; }
+  100% { transform: translateY(-8px) scale(1.5); opacity: 0; }
+}
+
+.smoke-wisps circle {
+  animation: smoke-rise 3s ease-out infinite;
+}
+.smoke-wisps circle:nth-child(2) {
+  animation-delay: 1.5s;
+}
+
+/* Damaged building shake */
+.building-damaged {
+  animation: none;
+}
+.building-damaged:hover {
+  filter: brightness(0.9) !important;
+}
+
+/* Banner wave for flags */
+@keyframes banner-wave {
+  0%, 100% { transform: skewX(0deg); }
+  25% { transform: skewX(2deg); }
+  75% { transform: skewX(-2deg); }
+}
+
+.banner-wave polygon {
+  animation: banner-wave 2s ease-in-out infinite;
+  transform-origin: left center;
+}
