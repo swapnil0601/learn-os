@@ -2,7 +2,7 @@ import { Link, useLocation } from 'react-router-dom'
 import { ChevronRight, Home } from 'lucide-react'
 
 const routeLabels: Record<string, string> = {
-  '/': 'System Design',
+  '/': 'Learn OS',
   '/dsa': 'DSA',
   '/simulator': 'Simulator',
   '/quiz': 'Quiz',

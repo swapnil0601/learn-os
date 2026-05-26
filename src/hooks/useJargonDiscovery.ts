@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useMemo } from 'react'
-import { JargonTerm, JargonBadge } from '@/types'
+import { JargonTerm } from '@/types'
 import { jargonTerms, jargonBadges } from '@/data/jargon'
 
 const STORAGE_KEY = 'sysdesign-jargon-state'

@@ -1,5 +1,5 @@
 import { useMemo, useState, useEffect } from 'react'
-import { X, Lightbulb, AlertTriangle, Info, ArrowRight, Link2, Columns2, BookOpen, Brain } from 'lucide-react'
+import { X, Lightbulb, AlertTriangle, Info, Link2, Columns2, BookOpen, Brain } from 'lucide-react'
 import { Concept, CardState, CATEGORY_COLORS } from '@/types'
 import { ReviewQuality } from '@/utils/sm2'
 import { PointQuiz } from './PointQuiz'
@@ -316,7 +316,7 @@ function DeepDivePanel({
   )
 }
 
-export function DeepDiveCard({ concept, cardState, onReview, onClose, onConceptNavigate, getCardState, discoveredTerms, onConceptViewed }: DeepDiveCardProps) {
+export function DeepDiveCard({ concept, cardState, onReview, onClose, getCardState, discoveredTerms, onConceptViewed }: DeepDiveCardProps) {
   const [secondaryId, setSecondaryId] = useState<string | null>(null)
 
   // Fire discovery on mount / concept change

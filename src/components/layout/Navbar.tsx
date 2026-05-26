@@ -16,7 +16,7 @@ interface NavbarProps {
 }
 
 const navItems = [
-  { path: '/', label: 'System Design', icon: BookOpen },
+  { path: '/', label: 'Learn OS', icon: BookOpen },
   { path: '/dsa', label: 'DSA', icon: Code2 },
   { path: '/simulator', label: 'Simulator', icon: Gamepad2 },
   { path: '/quiz', label: 'Quiz', icon: HelpCircle },
