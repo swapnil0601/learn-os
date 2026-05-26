@@ -16,7 +16,7 @@ interface NavbarProps {
 }
 
 const navItems = [
-  { path: '/', label: 'Learn OS', icon: BookOpen },
+  { path: '/', label: 'System Design', icon: BookOpen },
   { path: '/dsa', label: 'DSA', icon: Code2 },
   { path: '/simulator', label: 'Simulator', icon: Gamepad2 },
   { path: '/quiz', label: 'Quiz', icon: HelpCircle },
@@ -47,7 +47,7 @@ export function Navbar({
           <Link to="/" className="flex items-center gap-2">
             <BookOpen className="h-5 w-5 text-primary" />
             <span className="font-semibold text-sm tracking-tight">
-              DevMastery
+              Learn OS
             </span>
             {isDemoMode && (
               <span className="text-[10px] bg-amber-500/20 text-amber-400 px-1.5 py-0.5 rounded font-medium">

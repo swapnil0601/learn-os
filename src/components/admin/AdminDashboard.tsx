@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import {
   Users,
   Activity,
@@ -9,6 +9,9 @@ import {
   ChevronDown,
   ChevronUp,
   Shield,
+  Code2,
+  Gamepad2,
+  MessageSquare,
 } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
 import { useAuth } from '@/hooks/useAuth'
@@ -20,6 +23,9 @@ import {
 } from '@/utils/demoData'
 import type { Profile, QuizAttempt, CardStateRow, ActivityLog } from '@/types/database'
 import { cn } from '@/lib/utils'
+import { dsaAlgorithms, dsaProblems } from '@/data/dsa'
+import { simScenarios } from '@/data/simScenarios'
+import { jargonTerms } from '@/data/jargon'
 
 interface UserSummary {
   profile: Profile
@@ -32,6 +38,66 @@ interface UserSummary {
   streak: number
 }
 
+interface LocalModuleStats {
+  dsa: { total: number; reviewed: number; mastered: number; dueCount: number }
+  simulator: { total: number; reviewed: number; mastered: number; dueCount: number }
+  jargon: { total: number; discovered: number; reviewed: number; mastered: number; dueCount: number }
+}
+
+function loadLocalModuleStats(): LocalModuleStats {
+  const today = new Date().toISOString().split('T')[0]
+
+  // DSA
+  let dsaState: Record<string, { repetitions: number; nextReviewDate: string }> = {}
+  try {
+    const raw = localStorage.getItem('sysdesign-dsa-sr')
+    if (raw) dsaState = JSON.parse(raw)
+  } catch { /* */ }
+  const dsaTotal = dsaAlgorithms.length + dsaProblems.length
+  const dsaCards = Object.values(dsaState)
+  const dsaReviewed = dsaCards.filter(c => c.repetitions > 0).length
+  const dsaMastered = dsaCards.filter(c => c.repetitions >= 5).length
+  const dsaDue = dsaTotal - dsaCards.filter(c => c.nextReviewDate > today).length
+
+  // Simulator
+  let simState: Record<string, { repetitions: number; nextReviewDate: string }> = {}
+  try {
+    const raw = localStorage.getItem('sysdesign-sim-sr')
+    if (raw) simState = JSON.parse(raw)
+  } catch { /* */ }
+  const simTotal = simScenarios.length
+  const simCards = Object.values(simState)
+  const simReviewed = simCards.filter(c => c.repetitions > 0).length
+  const simMastered = simCards.filter(c => c.repetitions >= 5).length
+  const simDue = simTotal - simCards.filter(c => c.nextReviewDate > today).length
+
+  // Jargon
+  let jargonDiscovered: string[] = []
+  let jargonSRState: Record<string, { repetitions: number; nextReviewDate: string }> = {}
+  try {
+    const raw = localStorage.getItem('sysdesign-jargon-state')
+    if (raw) {
+      const parsed = JSON.parse(raw)
+      jargonDiscovered = parsed.discoveredTermIds || []
+    }
+  } catch { /* */ }
+  try {
+    const raw = localStorage.getItem('sysdesign-jargon-sr')
+    if (raw) jargonSRState = JSON.parse(raw)
+  } catch { /* */ }
+  const jargonTotal = jargonTerms.length
+  const jargonCards = Object.values(jargonSRState)
+  const jargonReviewed = jargonCards.filter(c => c.repetitions > 0).length
+  const jargonMastered = jargonCards.filter(c => c.repetitions >= 5).length
+  const jargonDue = jargonDiscovered.length - jargonCards.filter(c => c.nextReviewDate > today).length
+
+  return {
+    dsa: { total: dsaTotal, reviewed: dsaReviewed, mastered: dsaMastered, dueCount: Math.max(0, dsaDue) },
+    simulator: { total: simTotal, reviewed: simReviewed, mastered: simMastered, dueCount: Math.max(0, simDue) },
+    jargon: { total: jargonTotal, discovered: jargonDiscovered.length, reviewed: jargonReviewed, mastered: jargonMastered, dueCount: Math.max(0, jargonDue) },
+  }
+}
+
 export function AdminDashboard() {
   const { isDemoMode } = useAuth()
   const [users, setUsers] = useState<UserSummary[]>([])
@@ -39,6 +105,8 @@ export function AdminDashboard() {
   const [loading, setLoading] = useState(true)
   const [expandedUser, setExpandedUser] = useState<string | null>(null)
   const [userCardStates, setUserCardStates] = useState<Record<string, CardStateRow[]>>({})
+
+  const localStats = useMemo(() => loadLocalModuleStats(), [])
 
   useEffect(() => {
     loadDashboardData()
@@ -176,6 +244,51 @@ export function AdminDashboard() {
         <MetricCard icon={TrendingUp} label="Avg Mastered" value={avgMastered} accent="purple" />
       </div>
 
+      {/* Local Module Progress */}
+      <div className="bg-card border border-border rounded-xl overflow-hidden mb-8">
+        <div className="px-4 py-3 border-b border-border">
+          <h2 className="text-sm font-semibold text-foreground">Module Progress (Local)</h2>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 p-4">
+          <ModuleCard
+            icon={Code2}
+            title="DSA"
+            color="blue"
+            stats={[
+              { label: 'Total Items', value: localStats.dsa.total },
+              { label: 'Reviewed', value: localStats.dsa.reviewed },
+              { label: 'Mastered', value: localStats.dsa.mastered },
+              { label: 'Due Today', value: localStats.dsa.dueCount },
+            ]}
+            progressPct={localStats.dsa.total > 0 ? Math.round((localStats.dsa.mastered / localStats.dsa.total) * 100) : 0}
+          />
+          <ModuleCard
+            icon={Gamepad2}
+            title="Simulator"
+            color="purple"
+            stats={[
+              { label: 'Scenarios', value: localStats.simulator.total },
+              { label: 'Attempted', value: localStats.simulator.reviewed },
+              { label: 'Mastered', value: localStats.simulator.mastered },
+              { label: 'Due Today', value: localStats.simulator.dueCount },
+            ]}
+            progressPct={localStats.simulator.total > 0 ? Math.round((localStats.simulator.mastered / localStats.simulator.total) * 100) : 0}
+          />
+          <ModuleCard
+            icon={MessageSquare}
+            title="Jargon Codex"
+            color="amber"
+            stats={[
+              { label: 'Total Terms', value: localStats.jargon.total },
+              { label: 'Discovered', value: localStats.jargon.discovered },
+              { label: 'Mastered', value: localStats.jargon.mastered },
+              { label: 'Due Today', value: localStats.jargon.dueCount },
+            ]}
+            progressPct={localStats.jargon.total > 0 ? Math.round((localStats.jargon.discovered / localStats.jargon.total) * 100) : 0}
+          />
+        </div>
+      </div>
+
       {/* Users Table */}
       <div className="bg-card border border-border rounded-xl overflow-hidden mb-8">
         <div className="px-4 py-3 border-b border-border">
@@ -263,6 +376,50 @@ function MetricCard({
         {label}
       </div>
       <span className={cn('text-xl font-bold', valueColor)}>{value}</span>
+    </div>
+  )
+}
+
+function ModuleCard({
+  icon: Icon,
+  title,
+  color,
+  stats,
+  progressPct,
+}: {
+  icon: typeof Code2
+  title: string
+  color: 'blue' | 'purple' | 'amber'
+  stats: { label: string; value: number }[]
+  progressPct: number
+}) {
+  const colorMap = {
+    blue: { bg: 'bg-blue-500/10', text: 'text-blue-400', bar: 'bg-blue-500' },
+    purple: { bg: 'bg-purple-500/10', text: 'text-purple-400', bar: 'bg-purple-500' },
+    amber: { bg: 'bg-amber-500/10', text: 'text-amber-400', bar: 'bg-amber-500' },
+  }
+  const c = colorMap[color]
+
+  return (
+    <div className="border border-border rounded-lg p-4">
+      <div className="flex items-center gap-2 mb-3">
+        <div className={cn('p-1.5 rounded-md', c.bg)}>
+          <Icon className={cn('h-4 w-4', c.text)} />
+        </div>
+        <span className="text-sm font-semibold text-foreground">{title}</span>
+        <span className={cn('text-xs font-bold ml-auto', c.text)}>{progressPct}%</span>
+      </div>
+      <div className="h-1.5 bg-secondary rounded-full mb-3 overflow-hidden">
+        <div className={cn('h-full rounded-full transition-all', c.bar)} style={{ width: `${progressPct}%` }} />
+      </div>
+      <div className="grid grid-cols-2 gap-2">
+        {stats.map((s) => (
+          <div key={s.label} className="text-center">
+            <div className="text-xs text-muted-foreground">{s.label}</div>
+            <div className="text-sm font-bold text-foreground">{s.value}</div>
+          </div>
+        ))}
+      </div>
     </div>
   )
 }

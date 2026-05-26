@@ -89,7 +89,7 @@ export function ReviewDashboard({ dueCards, getCardState, onReview, discoveredTe
       <div className="mb-8">
         <div className="flex items-center gap-3 mb-2">
           <GraduationCap className="h-6 w-6 text-primary" />
-          <h1 className="text-xl font-bold text-foreground">Learn OS</h1>
+          <h1 className="text-xl font-bold text-foreground">System Design</h1>
         </div>
         <p className="text-sm text-muted-foreground mb-4">
           {concepts.length} concepts across {CHAPTER_ORDER.length} chapters
