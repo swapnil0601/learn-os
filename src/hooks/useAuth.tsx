@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState, useCallback, useRef, type ReactNode } from 'react'
+import { createContext, useContext, useEffect, useState, useCallback, type ReactNode } from 'react'
 import { supabase } from '@/lib/supabase'
 import type { User, Session } from '@supabase/supabase-js'
 import type { Profile } from '@/types/database'
@@ -26,8 +26,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<Session | null>(null)
   const [loading, setLoading] = useState(true)
 
-  const loggedSessionRef = useRef(false)
-
   const fetchProfile = useCallback(async (userId: string) => {
     const { data } = await supabase
       .from('profiles')
@@ -36,8 +34,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       .single()
     setProfile(data)
 
-    if (data && !loggedSessionRef.current) {
-      loggedSessionRef.current = true
+    const sessionKey = `login-logged-${userId}`
+    if (data && !sessionStorage.getItem(sessionKey)) {
+      sessionStorage.setItem(sessionKey, '1')
       await supabase
         .from('profiles')
         .update({ last_login_at: new Date().toISOString() })
